@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>StudyFlow Pro — by Priyansh</title>
+  
+  <!-- Math Formula & Symbol Rendering (KaTeX) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       1. DYNAMIC THEME SYSTEM (INTERFACE ENGINE)
+       ========================================================================= */
+    :root {
+      --bg: #000000;
+      --card: #0a0a0a;
+      --card-border: #1a1a1a;
+      --card-hover: #141414;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.35);
+      --accent-secondary: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --sidebar-width: 250px;
+    }
+
+    body.theme-oled {
+      --bg: #000000;
+      --card: #0a0a0a;
+      --card-border: #1a1a1a;
+      --card-hover: #141414;
+      --text: #ffffff;
+      --text-muted: #737373;
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.4);
+      --accent-secondary: #3b82f6;
+    }
+
+    body.theme-minimal-white {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-border: #e2e8f0;
+      --card-hover: #f1f5f9;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #4f46e5;
+      --accent-glow: rgba(79, 70, 229, 0.2);
+      --accent-secondary: #0284c7;
+    }
+
+    body.theme-cyberpunk {
+      --bg: #040807;
+      --card: #08130f;
+      --card-border: #0f2e23;
+      --card-hover: #0c1c16;
+      --text: #ecfdf5;
+      --text-muted: #6ee7b7;
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.4);
+      --accent-secondary: #06b6d4;
+    }
+
+    body.theme-nordic {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-border: #334155;
+      --card-hover: #243247;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --accent-secondary: #818cf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ==========================================================================
+       2. CINEMATIC SPLASH SCREEN & BRANDING
+       ========================================================================= */
+    #splashScreen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .splash-emblem {
+      width: 76px;
+      height: 76px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 45px var(--accent-glow);
+      margin-bottom: 20px;
+    }
+
+    .splash-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .splash-byline {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .splash-quote {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .splash-track {
+      width: 150px;
+      height: 3px;
+      background: var(--card-border);
+      border-radius: 10px;
+      margin-top: 26px;
+      overflow: hidden;
+    }
+
+    .splash-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ==========================================================================
+       3. RESPONSIVE SHELL
+       ========================================================================= */
+    .app-layout {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--card);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      padding: 18px 12px;
+      gap: 5px;
+      z-index: 50;
+    }
+
+    .brand-box {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 4px 6px 16px 6px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 8px;
+    }
+
+    .brand-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .brand-box h2 { font-size: 14.5px; font-weight: 800; }
+    .brand-tagline { font-size: 11px; color: var(--accent); font-weight: 700; }
+    .brand-quote { font-size: 10px; color: var(--text-muted); font-style: italic; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .nav-item:hover { background-color: var(--card-hover); color: var(--text); }
+    .nav-item.active { background-color: var(--card-border); color: var(--accent); }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .main-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .top-header {
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      background-color: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .content-container {
+      padding: 24px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    .tab-view { display: none; }
+    .tab-view.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .panel {
+      background-color: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn svg { width: 14px; height: 14px; }
+
+    .btn-secondary { background-color: var(--card-border); color: var(--text); }
+    .btn-secondary:hover { background-color: var(--card-hover); }
+    .btn-engine {
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .btn-success { background-color: var(--success); color: #fff; }
+
+    .input-field {
+      background-color: var(--bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--accent); }
+
+    .video-container-full {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      margin-top: 14px;
+    }
+    .video-container-full iframe { width: 100%; height: 100%; border: none; }
+
+    /* Slide-out Scratchpad */
+    .slide-scratchpad {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 400px;
+      height: 100vh;
+      background-color: var(--card);
+      border-left: 1px solid var(--card-border);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.6);
+      z-index: 100;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .slide-scratchpad.open { right: 0; }
+
+    /* Mobile Bottom Dock */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background-color: var(--card);
+      border-top: 1px solid var(--card-border);
+      z-index: 90;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .mobile-nav-item {
+      background: none; border: none; color: var(--text-muted); font-size: 11px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;
+    }
+    .mobile-nav-item.active { color: var(--accent); }
+    .mobile-nav-item svg { width: 17px; height: 17px; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .mobile-nav { display: flex; }
+      .slide-scratchpad { width: 100vw; right: -100vw; }
+      .main-viewport { height: calc(100vh - 60px); }
+      .content-container { padding: 16px; }
+      .top-header { padding: 10px 16px; }
+    }
+  </style>
+</head>
+<body class="theme-oled" id="appBody">
+
+  <!-- SPLASH SCREEN -->
+  <div id="splashScreen">
+    <div class="splash-emblem">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+        <path d="M2 17l10 5 10-5"></path>
+        <path d="M2 12l10 5 10-5"></path>
+      </svg>
+    </div>
+    <div class="splash-title">StudyFlow Pro</div>
+    <div class="splash-byline">by Priyansh</div>
+    <div class="splash-quote">"powered by AI Engine"</div>
+    <div class="splash-track">
+      <div class="splash-fill" id="splashFill"></div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-head">
+          <div class="brand-avatar">SF</div>
+          <div>
+            <h2>StudyFlow Pro</h2>
+            <div class="brand-tagline">by Priyansh</div>
+          </div>
+        </div>
+        <div class="brand-quote">"powered by AI Engine"</div>
+      </div>
+
+      <button class="nav-item active" onclick="switchTab('lectures')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <span>Lectures & AI Recap</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('notes')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+        <span>High-Yield Vault</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('test')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <span>Exam Suite & Exports</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('socratic')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Doubt Demon (Debate)</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('syllabus')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Syllabus & Backlog</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('arcade')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4m-2-2v4m10-2h.01m-3 0h.01"></path></svg>
+        <span>Boss Arcade</span>
+      </button>
+
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 11px;" onclick="toggleAmbientNoise()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+          <span id="noiseBtnText">Focus Sound</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main class="main-viewport">
+      <header class="top-header">
+        <h1 id="viewTitle" style="font-size: 16px; font-weight: 700;">Lectures & AI Recap</h1>
+        
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <select id="themeSelector" class="input-field" style="width: auto; padding: 6px 10px; font-size: 11.5px;" onchange="setInterfaceTheme(this.value)">
+            <option value="theme-oled">OLED Pitch Black</option>
+            <option value="theme-minimal-white">Clean Minimal White</option>
+            <option value="theme-cyberpunk">Emerald Cyberpunk</option>
+            <option value="theme-nordic">Nordic Slate Navy</option>
+          </select>
+
+          <button class="btn btn-secondary" style="font-size: 11.5px; padding: 6px 12px;" onclick="toggleScratchpad()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <span>Scratchpad</span>
+          </button>
+          
+          <button class="btn btn-engine" style="font-size: 11.5px; padding: 6px 12px;" onclick="promptEngineKey()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>AI Key</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="content-container">
+
+        <!-- TAB 1: LECTURES -->
+        <div id="tab-lectures" class="tab-view active">
+          <div class="panel">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <input type="text" id="lectureUrlInput" class="input-field" style="flex: 1;" placeholder="Paste YouTube lecture URL or topic (PW, Unacademy, Khan Academy, Next Toppers)..." />
+              <button class="btn" onclick="playLecture()">Play</button>
+              <button class="btn btn-engine" onclick="generateAiLectureRecap()">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Extract Summary</span>
+              </button>
+            </div>
+
+            <div class="video-container-full" id="lecturePlayer">
+              <div style="display:flex; height:100%; align-items:center; justify-content:center; color: var(--text-muted); font-size: 13px;">
+                Enter a lecture URL to study in full cinema mode.
+              </div>
+            </div>
+
+            <div id="lectureRecapBox" style="display: none; margin-top: 20px; background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="font-size: 15px; font-weight: 700; color: var(--accent);">Lecture Breakdown & Traps</h3>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 5px 10px;" onclick="downloadText('Lecture_Recap.txt', document.getElementById('lectureRecapContent').innerText)">Export Notes</button>
+              </div>
+              <div id="lectureRecapContent" style="font-size: 13.5px; line-height: 1.7;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: HIGH-YIELD VAULT -->
+        <div id="tab-notes" class="tab-view">
+          <div class="panel">
+            <div class="panel-title">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+              <span>Live Notes & Examiner Formula Matrix</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+              <input type="text" id="notesTopicInput" class="input-field" style="flex: 1;" placeholder="Enter topic (e.g. Tissues Class 9, Motion, Gravitation, Organic Chemistry)..." />
+              <button class="btn btn-engine" onclick="generateLiveNotes('cheatsheet')">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Cheatsheet</span>
+              </button>
+              <button class="btn btn-secondary" onclick="generateLiveNotes('detailed')">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <span>In-Depth</span>
+              </button>
+              <button class="btn btn-secondary" onclick="generateLiveNotes('keywords')">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Examiner Keywords</span>
+              </button>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+              <button class="btn btn-secondary" style="font-size: 11px; padding: 5px 10px;" onclick="downloadText('StudyFlow_Notes.txt', document.getElementById('notesDisplay').innerText)">Export Notes (.txt)</button>
+            </div>
+            <div id="notesDisplay" style="background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; min-height: 220px; font-size: 13.5px; line-height: 1.7;">Type any topic or chapter above to generate custom academic notes.</div>
+          </div>
+        </div>
+
+        <!-- TAB 3: EXAM SUITE -->
+        <div id="tab-test" class="tab-view">
+          <div class="panel">
+            <div class="panel-title">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path></svg>
+              <span>AI Exam Suite & Diagnostic Rubric</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px;">
+              <input type="text" id="testTopicInput" class="input-field" placeholder="Enter Chapter (e.g. Tissues, Motion)..." />
+              <select id="testModeSelect" class="input-field">
+                <option value="school">Standard Board Exam (NCERT Standard)</option>
+                <option value="competitive">Competitive Trap Mode (JEE / NEET / Foundation)</option>
+              </select>
+              <select id="testMarksSelect" class="input-field">
+                <option value="15">15 Marks (Quick Drill)</option>
+                <option value="30">30 Marks (Unit Exam)</option>
+              </select>
+              <button class="btn btn-engine" onclick="generateExamPaper()">Generate Paper</button>
+            </div>
+
+            <div id="examPaperCard" style="display: none; background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-top: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <h3 id="paperTitle" style="font-size: 15.5px; font-weight: 700; color: var(--accent);"></h3>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary" style="font-size: 11px;" onclick="downloadText('Exam_Paper.txt', currentTestPaperText)">Download Paper</button>
+                  <button class="btn btn-secondary" style="font-size: 11px;" onclick="fetchAndDownloadAnswerKey()">Download Answer Key</button>
+                </div>
+              </div>
+              <div id="paperContent" style="font-size: 13.5px; line-height: 1.7; margin-bottom: 16px;"></div>
+              
+              <div style="border-top: 1px solid var(--card-border); padding-top: 16px;">
+                <p style="font-weight: 700; font-size: 13px; margin-bottom: 8px;">Your Written Solutions:</p>
+                <textarea id="studentAnswerText" class="input-field" rows="6" placeholder="Type out your full answers question by question..."></textarea>
+                <button class="btn btn-engine" style="margin-top: 10px;" onclick="gradeExamAnswers()">Submit for Evaluation</button>
+              </div>
+            </div>
+
+            <div id="gradeReportCard" style="display: none; background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-size: 15px; font-weight: 700; color: var(--success);">Detailed Examiner Report</h3>
+                <button class="btn btn-success" style="font-size: 11px;" onclick="downloadText('Evaluation_Scorecard.txt', currentGradeReportText)">Download Scorecard</button>
+              </div>
+              <div id="gradeReportBody" style="font-size: 13.5px; line-height: 1.7;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: SOCRATIC DOUBT DEMON -->
+        <div id="tab-socratic" class="tab-view">
+          <div class="panel">
+            <div class="panel-title">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>Socratic Doubt Demon — Conceptual Interrogator</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px;">
+              Explain a concept in your own words. The Doubt Demon will find logical lapses, challenge your premises, and force you to defend your reasoning.
+            </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input type="text" id="socraticChapterInput" class="input-field" placeholder="Topic to be interrogated on (e.g. Parenchyma, Newton's Third Law)..." />
+              <button class="btn btn-engine" onclick="startSocraticDebate()">Start</button>
+            </div>
+            <div id="socraticChatBox" style="background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px; min-height: 200px; max-height: 350px; overflow-y: auto; font-size: 13.5px; line-height: 1.6; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;">
+              <span style="color: var(--text-muted);">Enter a topic above to begin.</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="socraticReplyInput" class="input-field" placeholder="Defend your concept here..." onkeydown="if(event.key==='Enter') sendSocraticReply()" />
+              <button class="btn" onclick="sendSocraticReply()">Argue</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: SYLLABUS & BACKLOG STRATEGIST (NOW FULLY EDITABLE) -->
+        <div id="tab-syllabus" class="tab-view">
+          <div class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+              <div class="panel-title" style="margin-bottom: 0;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Syllabus Matrix & Backlog Recovery</span>
+              </div>
+              <button class="btn btn-engine" style="font-size: 11.5px;" onclick="runAiBacklogStrategist()">Generate Rescue Plan</button>
+            </div>
+
+            <!-- ADD NEW CUSTOM CHAPTER BOX -->
+            <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+              <input type="text" id="newChapterInput" class="input-field" placeholder="Add custom chapter/subject (e.g. Chemical Reactions, Trigonometry)..." onkeydown="if(event.key==='Enter') addNewChapter()" />
+              <button class="btn btn-secondary" onclick="addNewChapter()">+ Add Chapter</button>
+            </div>
+            
+            <div id="syllabusContainer"></div>
+
+            <div id="backlogStrategyBox" style="display: none; margin-top: 18px; background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px; font-size: 13.5px; line-height: 1.7;"></div>
+          </div>
+        </div>
+
+        <!-- TAB 6: BOSS ARCADE -->
+        <div id="tab-arcade" class="tab-view">
+          <div class="panel">
+            <div class="panel-title">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>
+              <span>Boss Battle Arcade & Mental Break</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+              <button class="btn btn-engine" onclick="initBossBattle()">Boss Battle Quiz</button>
+              <button class="btn btn-secondary" onclick="generateAiRiddle()">Lateral Science Riddle</button>
+            </div>
+
+            <div id="arcadeArena" style="background: var(--bg); border: 1px solid var(--card-border); border-radius: 14px; min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+              <p style="color: var(--text-muted); font-size: 13px;">Select a game mode above to start.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- SLIDE-OVER SCRATCHPAD -->
+  <aside class="slide-scratchpad" id="scratchpad">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="font-size: 15px; font-weight: 700;">Quick Scratchpad</h3>
+      <button onclick="toggleScratchpad()" style="background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;">✕</button>
+    </div>
+    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">For rough calculations and thoughts. Saves locally.</p>
+    <textarea id="roughNotes" class="input-field" style="flex: 1; resize: none; line-height: 1.6;" placeholder="Jot down quick doubts or timestamps..."></textarea>
+  </aside>
+
+  <!-- Mobile Bottom Dock -->
+  <nav class="mobile-nav">
+    <button class="mobile-nav-item active" onclick="switchTab('lectures')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      <span>Lectures</span>
+    </button>
+    <button class="mobile-nav-item" onclick="switchTab('notes')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+      <span>Notes</span>
+    </button>
+    <button class="mobile-nav-item" onclick="switchTab('test')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path></svg>
+      <span>Exam</span>
+    </button>
+    <button class="mobile-nav-item" onclick="switchTab('socratic')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span>Debate</span>
+    </button>
+    <button class="mobile-nav-item" onclick="switchTab('syllabus')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect></svg>
+      <span>Syllabus</span>
+    </button>
+  </nav>
+
+  <!-- JAVASCRIPT ARCHITECTURE -->
+  <script>
+    // --- 1. BOOT & SPLASH SCREEN ANIMATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const fill = document.getElementById('splashFill');
+      const splash = document.getElementById('splashScreen');
+      if (fill) fill.style.width = '100%';
+
+      const savedTheme = localStorage.getItem('sf_interface_theme') || 'theme-oled';
+      setInterfaceTheme(savedTheme, false);
+
+      setTimeout(() => {
+        if (splash) {
+          splash.style.opacity = '0';
+          splash.style.visibility = 'hidden';
+        }
+      }, 1300);
+    });
+
+    // --- 2. INTERFACE CHANGE CONTROLLER ---
+    function setInterfaceTheme(themeName, save = true) {
+      document.getElementById('appBody').className = themeName;
+      document.getElementById('themeSelector').value = themeName;
+      if (save) localStorage.setItem('sf_interface_theme', themeName);
+    }
+
+    // --- 3. CLEAN TEXT & FORMULA FORMATTER ---
+    function cleanRender(text) {
+      if (!text) return '';
+      
+      text = text.replace(/\$\$([\s\S]+?)\$\$/g, (match, eq) => {
+        try {
+          return katex.renderToString(eq.trim(), { displayMode: true, throwOnError: false });
+        } catch(e) { return eq; }
+      });
+
+      text = text.replace(/\$([^\$\n]+?)\$/g, (match, eq) => {
+        try {
+          return katex.renderToString(eq.trim(), { displayMode: false, throwOnError: false });
+        } catch(e) { return eq; }
+      });
+
+      text = text.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      text = text.replace(/\*([^\*]+?)\*/g, '<i>$1</i>');
+      return text.replace(/\n/g, '<br/>');
+    }
+
+    // --- 4. AI ENGINE CONNECTOR (SMART FALLBACK CHAIN) ---
+    let ENGINE_KEY = localStorage.getItem('sf_engine_key') || '';
+
+    function promptEngineKey() {
+      const key = prompt("Enter your AI Studio API Key (Stored privately on your device):", ENGINE_KEY);
+      if (key !== null) {
+        ENGINE_KEY = key.trim();
+        localStorage.setItem('sf_engine_key', ENGINE_KEY);
+        alert(ENGINE_KEY ? "AI Engine Connected Successfully." : "Key cleared.");
+      }
+    }
+
+    const CANDIDATE_MODELS = [
+      'gemini-3.5-flash-lite',
+      'gemini-3.8-flash',
+      'gemini-2.5-flash'
+    ];
+
+    async function queryAiEngine(promptText) {
+      if (!ENGINE_KEY) {
+        alert("Please connect your AI Key first via 'AI Key' button on the top right.");
+        promptEngineKey();
+        if (!ENGINE_KEY) throw new Error("No API key provided.");
+      }
+
+      let lastError = null;
+
+      for (const model of CANDIDATE_MODELS) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${ENGINE_KEY}`;
+          const payload = { contents: [{ parts: [{ text: promptText }] }] };
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error?.message || `HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            return data.candidates[0].content.parts[0].text;
+          }
+        } catch (e) {
+          lastError = e;
+          console.warn(`Model ${model} failed, trying fallback:`, e.message);
+        }
+      }
+
+      throw new Error(lastError?.message || "All AI models are currently busy. Please try again in 10 seconds.");
+    }
+
+    // --- 5. NAVIGATION ---
+    function switchTab(t) {
+      document.querySelectorAll('.tab-view').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.mobile-nav-item').forEach(e => e.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + t);
+      if (target) target.classList.add('active');
+
+      const titles = {
+        lectures: 'Lectures & AI Recap',
+        notes: 'High-Yield Vault',
+        test: 'AI Exam Suite & Exports',
+        socratic: 'Doubt Demon (Debate)',
+        syllabus: 'Syllabus & Backlog',
+        arcade: 'Boss Arcade'
+      };
+      document.getElementById('viewTitle').innerText = titles[t] || 'StudyFlow Pro';
+
+      const tabs = ['lectures', 'notes', 'test', 'socratic', 'syllabus', 'arcade'];
+      const idx = tabs.indexOf(t);
+      if (document.querySelectorAll('.sidebar .nav-item')[idx]) {
+        document.querySelectorAll('.sidebar .nav-item')[idx].classList.add('active');
+      }
+      if (document.querySelectorAll('.mobile-nav-item')[idx]) {
+        document.querySelectorAll('.mobile-nav-item')[idx].classList.add('active');
+      }
+    }
+
+    // --- 6. LECTURES & RECAP ---
+    function playLecture() {
+      const input = document.getElementById('lectureUrlInput').value.trim();
+      const player = document.getElementById('lecturePlayer');
+      if (!input) return;
+
+      let id = '';
+      if (input.includes('v=')) id = input.split('v=')[1].split('&')[0];
+      else if (input.includes('youtu.be/')) id = input.split('youtu.be/')[1].split('?')[0];
+      else if (input.length === 11) id = input;
+
+      if (id) {
+        player.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" allowfullscreen></iframe>`;
+      } else {
+        player.innerHTML = `<iframe src="${input}"></iframe>`;
+      }
+    }
+
+    async function generateAiLectureRecap() {
+      const input = document.getElementById('lectureUrlInput').value.trim();
+      const box = document.getElementById('lectureRecapBox');
+      const content = document.getElementById('lectureRecapContent');
+      if (!input) { alert("Please paste a lecture URL or topic first."); return; }
+
+      box.style.display = 'block';
+      content.innerHTML = `Analyzing "${input}" and extracting high-yield exam takeaways...`;
+
+      const prompt = `You are an elite academic coach. Analyze this lecture/topic: "${input}". 
+Generate a comprehensive, high-yield lecture recap:
+1. Core Concepts & Definitions Taught
+2. Critical Diagrams / Formulas to memorize
+3. High-Frequency Board Exam Traps & Examiner Tricks from this topic.
+Format with clean bullet points and bold headers.`;
+
+      try {
+        const res = await queryAiEngine(prompt);
+        content.innerHTML = cleanRender(res);
+      } catch (e) { content.innerText = `Error: ${e.message}`; }
+    }
+
+    // --- 7. HIGH-YIELD NOTES ---
+    async function generateLiveNotes(type) {
+      const topic = document.getElementById('notesTopicInput').value.trim() || 'Tissues Class 9';
+      const disp = document.getElementById('notesDisplay');
+      disp.innerHTML = `Compiling ${type} notes for "${topic}"...`;
+
+      let prompt = '';
+      if (type === 'cheatsheet') {
+        prompt = `Generate a concise, high-yield student CHEATSHEET for "${topic}". Include core classifications, essential formulas/terms, and 3 common student pitfalls.`;
+      } else if (type === 'detailed') {
+        prompt = `Generate an in-depth academic study guide for "${topic}". Break down: 1) Definitions & Structure, 2) Step-by-step mechanical/biological explanation, 3) Real exam derivations and critical diagrams.`;
+      } else {
+        prompt = `Extract the TOP 10 KEYWORDS and DEFINITIONS that examiners look for when grading answers on "${topic}". List keyword followed by exact marks-scoring sentence.`;
+      }
+
+      try {
+        const res = await queryAiEngine(prompt);
+        disp.innerHTML = cleanRender(res);
+      } catch (e) { disp.innerText = `Error: ${e.message}`; }
+    }
+
+    // --- 8. EXAM ENGINE + DOWNLOADS ---
+    let currentTestPaperText = '';
+    let currentGradeReportText = '';
+    let currentExamTopic = '';
+
+    async function generateExamPaper() {
+      const topic = document.getElementById('testTopicInput').value.trim() || 'Tissues';
+      const mode = document.getElementById('testModeSelect').value;
+      const marks = document.getElementById('testMarksSelect').value;
+      const card = document.getElementById('examPaperCard');
+      const content = document.getElementById('paperContent');
+      const title = document.getElementById('paperTitle');
+
+      currentExamTopic = topic;
+      card.style.display = 'block';
+      content.innerHTML = `Composing a ${marks}-marks ${mode} paper for "${topic}"...`;
+
+      const prompt = `Create a strict academic question paper for chapter "${topic}".
+Exam Type: ${mode === 'school' ? 'Board/NCERT Standard Exam' : 'Competitive Trap Exam (Assertion-Reason & Multi-Concept)'}.
+Total Marks: ${marks}.
+Format: Numbered questions with explicit mark allocations [e.g. 3 Marks]. Provide 3 to 5 questions totaling exactly ${marks} marks. Do NOT include answers here.`;
+
+      try {
+        const paper = await queryAiEngine(prompt);
+        currentTestPaperText = paper;
+        title.innerText = `${topic.toUpperCase()} — ${marks} Marks (${mode.toUpperCase()})`;
+        content.innerHTML = cleanRender(paper);
+      } catch (e) { content.innerText = `Error: ${e.message}`; }
+    }
+
+    async function fetchAndDownloadAnswerKey() {
+      if (!currentTestPaperText) { alert("Generate an exam paper first."); return; }
+      const keyPrompt = `Provide the official complete marking scheme and model answers for this exam paper:\n\n${currentTestPaperText}\n\nShow step-by-step mark distribution for each question.`;
+      try {
+        const key = await queryAiEngine(keyPrompt);
+        downloadText(`${currentExamTopic}_Official_Answer_Key.txt`, key);
+      } catch (e) { alert("Failed to generate answer key: " + e.message); }
+    }
+
+    async function gradeExamAnswers() {
+      const answers = document.getElementById('studentAnswerText').value.trim();
+      const marks = document.getElementById('testMarksSelect').value;
+      const reportCard = document.getElementById('gradeReportCard');
+      const body = document.getElementById('gradeReportBody');
+
+      if (!answers) { alert("Please enter your answers before submitting."); return; }
+
+      reportCard.style.display = 'block';
+      body.innerHTML = "Grading your answers line-by-line according to official marking schemes...";
+
+      const prompt = `You are a strict, top-tier exam evaluator.
+TEST PAPER:
+${currentTestPaperText}
+
+STUDENT'S SUBMITTED SOLUTIONS:
+${answers}
+
+TOTAL MARKS: ${marks}
+
+Grade the submission thoroughly:
+1. Final Score: Award an exact score out of ${marks}.
+2. Step-by-Step Marking Breakdown: Question by question, stating marks earned and deducted.
+3. Missing Keywords & Technical Lapses: Point out exact terminology missed.
+4. Model Answers: Show what full-marks answers look like.`;
+
+      try {
+        const report = await queryAiEngine(prompt);
+        currentGradeReportText = report;
+        body.innerHTML = cleanRender(report);
+      } catch (e) { body.innerText = `Grading failed: ${e.message}`; }
+    }
+
+    function downloadText(filename, text) {
+      if (!text) { alert("No content available to download."); return; }
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    // --- 9. SOCRATIC DOUBT DEMON ---
+    async function startSocraticDebate() {
+      const topic = document.getElementById('socraticChapterInput').value.trim();
+      const box = document.getElementById('socraticChatBox');
+      if (!topic) { alert("Enter a topic to begin."); return; }
+
+      box.innerHTML = `<span style="color:var(--accent);">Preparing the interrogation on "${topic}"...</span>`;
+      try {
+        const opening = await queryAiEngine(`You are the Socratic Doubt Demon. The student is testing their understanding of "${topic}". Ask 1 deceptive, conceptual question to catch their weak points. Maximum 3 sentences.`);
+        box.innerHTML = `<div><b style="color:var(--accent);">Doubt Demon:</b> ${cleanRender(opening)}</div>`;
+      } catch (e) { box.innerText = e.message; }
+    }
+
+    async function sendSocraticReply() {
+      const input = document.getElementById('socraticReplyInput');
+      const box = document.getElementById('socraticChatBox');
+      const text = input.value.trim();
+      if (!text) return;
+
+      box.innerHTML += `<div><b style="color:var(--text);">You:</b> ${cleanRender(text)}</div>`;
+      input.value = '';
+      box.scrollTop = box.scrollHeight;
+
+      try {
+        const res = await queryAiEngine(`Student replied: "${text}". As the Socratic Doubt Demon, evaluate if they are right or wrong. Point out their logical fallacy or approve and ask the next harder question. Be sharp, concise, and educational.`);
+        box.innerHTML += `<div><b style="color:var(--accent);">Doubt Demon:</b> ${cleanRender(res)}</div>`;
+        box.scrollTop = box.scrollHeight;
+      } catch (e) { box.innerHTML += `<div style="color:red;">Error: ${e.message}</div>`; }
+    }
+
+    // --- 10. EDITABLE SYLLABUS & BACKLOG ENGINE ---
+    let defaultSyllabus = [
+      { name: "Tissues (Class 9 Bio)", lec: true, notes: true, test: false },
+      { name: "Motion (Class 9 Physics)", lec: true, notes: false, test: false },
+      { name: "Matter in Our Surroundings", lec: false, notes: false, test: false },
+      { name: "Gravitation (Physics)", lec: false, notes: false, test: false },
+      { name: "Number Systems (Maths)", lec: true, notes: true, test: true }
+    ];
+    let syllabus = JSON.parse(localStorage.getItem('sf_syllabus_pro_v3') || JSON.stringify(defaultSyllabus));
+
+    function renderSyllabus() {
+      const cont = document.getElementById('syllabusContainer');
+      if (syllabus.length === 0) {
+        cont.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">No chapters added yet. Use the box above to add chapters!</div>`;
+        return;
+      }
+
+      cont.innerHTML = syllabus.map((ch, i) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:var(--bg); border:1px solid var(--card-border); border-radius:10px; margin-bottom:8px; gap:10px; flex-wrap:wrap;">
+          <span style="font-weight:600; font-size:13.5px; flex:1; min-width:180px;">${ch.name}</span>
+          <div style="display:flex; align-items:center; gap:14px; font-size:12px;">
+            <label style="cursor:pointer;"><input type="checkbox" ${ch.lec ? 'checked' : ''} onchange="toggleSyllabus(${i}, 'lec')"> Lec</label>
+            <label style="cursor:pointer;"><input type="checkbox" ${ch.notes ? 'checked' : ''} onchange="toggleSyllabus(${i}, 'notes')"> Notes</label>
+            <label style="cursor:pointer;"><input type="checkbox" ${ch.test ? 'checked' : ''} onchange="toggleSyllabus(${i}, 'test')"> Test</label>
+            <button onclick="deleteChapter(${i})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:15px; padding:2px 6px; font-weight:700;" title="Delete chapter">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleSyllabus(i, key) {
+      syllabus[i][key] = !syllabus[i][key];
+      localStorage.setItem('sf_syllabus_pro_v3', JSON.stringify(syllabus));
+    }
+
+    function addNewChapter() {
+      const input = document.getElementById('newChapterInput');
+      const name = input.value.trim();
+      if (!name) return;
+
+      syllabus.push({ name: name, lec: false, notes: false, test: false });
+      localStorage.setItem('sf_syllabus_pro_v3', JSON.stringify(syllabus));
+      input.value = '';
+      renderSyllabus();
+    }
+
+    function deleteChapter(index) {
+      syllabus.splice(index, 1);
+      localStorage.setItem('sf_syllabus_pro_v3', JSON.stringify(syllabus));
+      renderSyllabus();
+    }
+
+    renderSyllabus();
+
+    async function runAiBacklogStrategist() {
+      const box = document.getElementById('backlogStrategyBox');
+      box.style.display = 'block';
+      box.innerHTML = "Drafting your custom 7-day recovery roadmap...";
+
+      const pending = syllabus.filter(s => !s.lec || !s.notes || !s.test);
+      if (pending.length === 0) {
+        box.innerHTML = "<b>All chapters completed!</b> No pending backlogs detected. Ready for full mock tests.";
+        return;
+      }
+
+      const prompt = `A student has these pending chapters in their syllabus:
+${JSON.stringify(pending)}
+
+Act as an elite academic strategist. Draft an urgent 7-Day Backlog Recovery Plan specifying exact hours, daily priorities, and revision cycles to clear this backlog with maximum efficiency.`;
+
+      try {
+        const plan = await queryAiEngine(prompt);
+        box.innerHTML = cleanRender(plan);
+      } catch (e) { box.innerText = e.message; }
+    }
+
+    // --- 11. BOSS ARCADE ---
+    let bossHp = 100;
+    let playerHp = 100;
+
+    async function initBossBattle() {
+      const arena = document.getElementById('arcadeArena');
+      arena.innerHTML = `<span style="color:var(--accent);">Preparing Quiz Arena...</span>`;
+      bossHp = 100; playerHp = 100;
+      nextBossQuestion();
+    }
+
+    async function nextBossQuestion() {
+      const arena = document.getElementById('arcadeArena');
+      if (bossHp <= 0) { arena.innerHTML = `<h2>VICTORY! You defeated the Boss.</h2><button class="btn btn-engine" style="margin-top:10px;" onclick="initBossBattle()">Play Again</button>`; return; }
+      if (playerHp <= 0) { arena.innerHTML = `<h2>DEFEAT! You ran out of HP.</h2><button class="btn btn-engine" style="margin-top:10px;" onclick="initBossBattle()">Try Again</button>`; return; }
+
+      const q = await queryAiEngine("Generate 1 challenging multiple-choice science question with 4 options (A, B, C, D). Label the correct answer strictly as 'CORRECT: X' at the very end.");
+      const parts = q.split('CORRECT:');
+      const questionText = parts[0].trim();
+      const correctAns = parts[1] ? parts[1].trim()[0] : 'A';
+
+      arena.innerHTML = `
+        <div style="display:flex; justify-content:space-between; width:100%; max-width:400px; margin-bottom:14px; font-weight:700; font-size:12px;">
+          <span style="color:var(--success);">YOUR HP: ${playerHp}</span>
+          <span style="color:var(--danger);">BOSS HP: ${bossHp}</span>
+        </div>
+        <div style="font-size:13.5px; line-height:1.6; text-align:left; max-width:420px; margin-bottom:14px;">${cleanRender(questionText)}</div>
+        <div style="display:flex; gap:8px;">
+          ${['A','B','C','D'].map(opt => `<button class="btn btn-secondary" onclick="handleBossAnswer('${opt}', '${correctAns}')">${opt}</button>`).join('')}
+        </div>`;
+    }
+
+    function handleBossAnswer(chosen, correct) {
+      if (chosen === correct) {
+        bossHp -= 35;
+        alert(`[CORRECT] Boss lost 35 HP.`);
+      } else {
+        playerHp -= 35;
+        alert(`[INCORRECT] You lost 35 HP. Correct answer was ${correct}.`);
+      }
+      nextBossQuestion();
+    }
+
+    async function generateAiRiddle() {
+      const arena = document.getElementById('arcadeArena');
+      arena.innerHTML = `<span style="color:var(--accent);">Generating lateral science riddle...</span>`;
+      const riddle = await queryAiEngine("Create 1 clever science or logic lateral thinking puzzle. Put the solution under 'Spoiler: Answer'.");
+      arena.innerHTML = `
+        <h3 style="font-size:15px; margin-bottom:10px; color:var(--accent);">Science & Logic Riddle</h3>
+        <div style="font-size:13.5px; line-height:1.6; max-width:450px; text-align:left;">${cleanRender(riddle)}</div>
+        <button class="btn btn-secondary" style="margin-top:14px;" onclick="generateAiRiddle()">Another Riddle</button>`;
+    }
+
+    // --- 12. SCRATCHPAD & WHITE NOISE ---
+    function toggleScratchpad() {
+      document.getElementById('scratchpad').classList.toggle('open');
+    }
+    const scratch = document.getElementById('roughNotes');
+    scratch.value = localStorage.getItem('sf_scratch_v2') || '';
+    scratch.addEventListener('input', () => localStorage.setItem('sf_scratch_v2', scratch.value));
+
+    let noiseSource = null;
+    function toggleAmbientNoise() {
+      const btn = document.getElementById('noiseBtnText');
+      if (!noiseSource) {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.04;
+        const s = ctx.createBufferSource();
+        s.buffer = buf; s.loop = true; s.connect(ctx.destination); s.start();
+        noiseSource = s;
+        btn.innerText = 'Stop Sound';
+      } else {
+        noiseSource.stop();
+        noiseSource = null;
+        btn.innerText = 'Focus Sound';
+      }
+    }
+  </script>
+</body>
+</html>
